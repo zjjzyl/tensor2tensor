@@ -342,23 +342,25 @@ class Text2TextProblem(problem.Problem):
     return ""
 
   def generate_data(self, data_dir, tmp_dir, task_id=-1):
-
+    # 构造对应文件名的方法dict
     filepath_fns = {
         problem.DatasetSplit.TRAIN: self.training_filepaths,
         problem.DatasetSplit.EVAL: self.dev_filepaths,
         problem.DatasetSplit.TEST: self.test_filepaths,
     }
-
+    # 根据dataset_splits 的设置，得到各类文件名
     split_paths = [(split["split"], filepath_fns[split["split"]](
         data_dir, split["shards"], shuffled=self.already_shuffled))
                    for split in self.dataset_splits]
     all_paths = []
     for _, paths in split_paths:
       all_paths.extend(paths)
-
+    # split 是train/eval/test,对应的paths是对应类别下根据shards生成的文件名list
     if self.is_generate_per_split:
       for split, paths in split_paths:
+        # generate_files(generator, filenames) 将generator生成的token id sample 写入 filenames
         generator_utils.generate_files(
+            # generate_encoded_samples yield token id形式的sample
             self.generate_encoded_samples(data_dir, tmp_dir, split), paths)
     else:
       generator_utils.generate_files(
